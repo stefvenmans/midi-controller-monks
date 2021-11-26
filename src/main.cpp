@@ -2,7 +2,6 @@
 #include <MIDI.h>
 #include <MIDIUSB.h>
 
-//MIDI_CREATE_DEFAULT_INSTANCE();
 #define D0 19
 #define D1 20
 #define D2 18
@@ -13,17 +12,7 @@
 
 int potChannels[] = {0 , 1, 3, 2, 4, 6, 7, 8, 9, 5};
 int lastReadings [10];
-int midiControls [] = {16, 17};
-
-void noteOn(byte channel, byte pitch, byte velocity) {
-  midiEventPacket_t noteOn = {0x09, 0x90 | channel, pitch, velocity};
-  MidiUSB.sendMIDI(noteOn);
-}
-
-void noteOff(byte channel, byte pitch, byte velocity) {
-  midiEventPacket_t noteOff = {0x08, 0x80 | channel, pitch, velocity};
-  MidiUSB.sendMIDI(noteOff);
-}
+int val = 0;
 
 void controlChange(byte channel, byte control, byte value) {
   midiEventPacket_t event = {0x0B, 0xB0 | channel, control, value};
@@ -40,21 +29,16 @@ int analogReadFromMultiplexer(int channel)
   return 127 - (analogRead(SIG)>>3);
 }
 
-
 void setup() {
-  //Serial.begin(9600);
   Serial.begin(115200);
-  pinMode(A3, INPUT);
+  pinMode(SIG, INPUT);
   pinMode(D0, OUTPUT);
   pinMode(D1, OUTPUT);
   pinMode(D2, OUTPUT);
   pinMode(D3, OUTPUT);
 
-  memset(lastReadings, 0, sizeof(int)*10);
+  memset(lastReadings, 0, sizeof(int)*CHANNELS);
 }
-
-int velocity;
-int val = 0;
 
 void loop() {
   for(int i=0; i<CHANNELS; i++)
@@ -69,4 +53,3 @@ void loop() {
   
   delay(5);
 }
-
