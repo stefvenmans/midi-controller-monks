@@ -11,7 +11,7 @@
 #define MIDI_CHANNEL 5
 
 int potChannels[] = {0 , 1, 3, 2, 4, 6, 7, 8, 9, 5};
-int lastReadings [10];
+int prevReadings [10];
 int val = 0;
 
 void controlChange(byte channel, byte control, byte value) {
@@ -26,7 +26,8 @@ int analogReadFromMultiplexer(int channel)
   digitalWrite(D2, channel & 0b0100);
   digitalWrite(D3, channel & 0b1000);
   delay(1);
-  return 127 - (analogRead(SIG)>>3);
+  //return 127 - (analogRead(SIG)>>3);
+  return analogRead(SIG);
 }
 
 void setup() {
@@ -37,18 +38,31 @@ void setup() {
   pinMode(D2, OUTPUT);
   pinMode(D3, OUTPUT);
 
-  memset(lastReadings, 0, sizeof(int)*CHANNELS);
+  memset(prevReadings, 0, sizeof(int)*CHANNELS);
+
+  // for(int i=0; i<CHANNELS; i++)
+  // {
+  //   val = analogReadFromMultiplexer(potChannels[i]);
+  //   controlChange(5,16 + i, 127 - (val>>3));
+  //   MidiUSB.flush();
+  //   prevReadings[i] = val;
+  // }
+
+  // delay();
 }
 
 void loop() {
   for(int i=0; i<CHANNELS; i++)
   {
     val = analogReadFromMultiplexer(potChannels[i]);
-    if(val != lastReadings[i]){
-      controlChange(5,16 + i,val);
-      MidiUSB.flush();
+    if(val != prevReadings[i] && val != prevReadings[i]-1 && val != prevReadings[i]+1){
+      if(i != 7){
+        controlChange(5,16 + i, 127 - (val>>3));
+        MidiUSB.flush();
+        }
+      prevReadings[i] = val;
     }
-    lastReadings[i] = val;
+    
   }
   
   delay(5);
