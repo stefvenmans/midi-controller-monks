@@ -26,7 +26,6 @@ int analogReadFromMultiplexer(int channel)
   digitalWrite(D2, channel & 0b0100);
   digitalWrite(D3, channel & 0b1000);
   delay(1);
-  //return 127 - (analogRead(SIG)>>3);
   return analogRead(SIG);
 }
 
@@ -39,22 +38,13 @@ void setup() {
   pinMode(D3, OUTPUT);
 
   memset(prevReadings, 0, sizeof(int)*CHANNELS);
-
-  // for(int i=0; i<CHANNELS; i++)
-  // {
-  //   val = analogReadFromMultiplexer(potChannels[i]);
-  //   controlChange(5,16 + i, 127 - (val>>3));
-  //   MidiUSB.flush();
-  //   prevReadings[i] = val;
-  // }
-
-  // delay();
 }
 
 void loop() {
   for(int i=0; i<CHANNELS; i++)
   {
     val = analogReadFromMultiplexer(potChannels[i]);
+    // Check if analog value changed more than 1 unit (10 bit)
     if(val != prevReadings[i] && val != prevReadings[i]-1 && val != prevReadings[i]+1){
       if(i != 7){
         controlChange(5,16 + i, 127 - (val>>3));
